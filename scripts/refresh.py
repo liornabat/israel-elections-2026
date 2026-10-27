@@ -70,25 +70,33 @@ def set_output(changed):
 
 
 def fetch(url):
-    """Download with curl. urllib from GitHub-hosted runners gets a bare 403."""
+    """Download with curl.
+
+    GitHub-hosted runners are blocked by the committee CloudFront. scripts/ensure_egress.sh
+    exports ALL_PROXY (a userspace WARP SOCKS tunnel) when a direct request is not allowed.
+    """
     last = None
+    proxy = os.environ.get('ALL_PROXY') or os.environ.get('all_proxy') or os.environ.get('https_proxy') or ''
     for attempt in range(3):
         with tempfile.NamedTemporaryFile() as handle:
             header_path = handle.name + '.hdr'
+            command = [
+                'curl', '-sS', '-L', '--http1.1', '--compressed',
+                '--max-time', '180',
+                '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                '-H', 'Accept: application/json,text/plain,*/*',
+                '-H', 'Accept-Language: he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+                '-H', 'Referer: https://mapvotes.bechirot.gov.il/',
+                '-D', header_path,
+                '-o', handle.name,
+                '-w', '%{http_code}',
+            ]
+            if proxy:
+                command.extend(['-x', proxy])
+            command.append(url)
             try:
                 result = subprocess.run(
-                    [
-                        'curl', '-sS', '-L', '--http1.1', '--compressed',
-                        '--max-time', '180',
-                        '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                        '-H', 'Accept: application/json,text/plain,*/*',
-                        '-H', 'Accept-Language: he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
-                        '-H', 'Referer: https://mapvotes.bechirot.gov.il/',
-                        '-D', header_path,
-                        '-o', handle.name,
-                        '-w', '%{http_code}',
-                        url,
-                    ],
+                    command,
                     check=False, capture_output=True, text=True,
                 )
             except Exception as error:

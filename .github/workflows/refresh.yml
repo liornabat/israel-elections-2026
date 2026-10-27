@@ -2,6 +2,8 @@
 # A push made with GITHUB_TOKEN does not start the branch-based Pages build, so
 # this workflow also deploys with actions/deploy-pages when it runs on main.
 # That deploy publishes only after Settings → Pages → Source is "GitHub Actions".
+# Hosted runners receive CloudFront HTTP 403 from mapvotes.bechirot.gov.il, so
+# the fetch step opens a userspace Cloudflare WARP tunnel when a direct GET fails.
 name: Refresh turnout
 
 on:
@@ -47,7 +49,10 @@ jobs:
 
       - name: Fetch the committee data and rebuild
         id: refresh
-        run: python3 scripts/refresh.py
+        run: |
+          # shellcheck disable=SC1091
+          source scripts/ensure_egress.sh
+          python3 scripts/refresh.py
 
       - name: Commit when the source data changed
         if: steps.refresh.outputs.changed == 'true'

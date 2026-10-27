@@ -6,3 +6,6 @@ turnout_municipal.csv
 turnout_neighborhood.csv
 turnout_kalpi.csv
 _site/
+wgcf-account.toml
+wgcf-profile.conf
+wireproxy.conf

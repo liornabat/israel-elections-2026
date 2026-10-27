@@ -10,8 +10,7 @@ on:
   schedule:
     - cron: "*/10 * * * *"
   workflow_dispatch:
-  # This branch is not on main yet, and this token cannot send workflow_dispatch.
-  # A push here runs the same job. After merge, schedule and workflow_dispatch are the triggers that matter.
+  # Lets this branch run the job before the workflow file is on main.
   push:
     branches:
       - cursor/live-refresh-aca5

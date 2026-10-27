@@ -1,0 +1,8 @@
+raw/
+__pycache__/
+*.pyc
+page_data.json
+turnout_municipal.csv
+turnout_neighborhood.csv
+turnout_kalpi.csv
+_site/

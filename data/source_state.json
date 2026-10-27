@@ -1,0 +1,34 @@
+{
+  "sha256": "9bff15fea9005a0fc1e3ac6cdcc74a6047078f95675ec282d5cd506bb9bfc6f1",
+  "fetched_at": "2026-10-27T15:31:05.303129+02:00",
+  "source": "EPCNT_125747.Csv",
+  "source_time": "12:57:47",
+  "percent": 31.5,
+  "voters": 2309587,
+  "files": {
+    "elections.json": {
+      "sha256": "9fa6333a809b51ab460dc7bae38a03aef47903312e7ab332950ac7dbc2ec6b28",
+      "bytes": 6538
+    },
+    "latest/kalpi_data.json": {
+      "sha256": "843e4b96fb82c23ecac46cdaadcc7e1db5a58eb460caae9b4b9a2be99822feb2",
+      "bytes": 1564370
+    },
+    "latest/municipal_data.json": {
+      "sha256": "0a07cbcaaca930a4dac23215fead3ab9f4c0cf80cd7ba9b7a9111356908218ba",
+      "bytes": 107742
+    },
+    "latest/municipal_geometry.topojson": {
+      "sha256": "07cc09e851b9f2a623accbd30ddfd9111b8ec758069c57eb27a8563305019139",
+      "bytes": 1112724
+    },
+    "latest/neighborhood_data.json": {
+      "sha256": "eddd899a20904b68f6bbb8dd1061b9a0d08651bac4709b98e37e3af36ac57ca3",
+      "bytes": 270731
+    },
+    "latest/neighborhood_geometry.topojson": {
+      "sha256": "768b1b53b55151584f8b6d19589e1699ea156f0c6b067e79e8b2f072ed57e2ab",
+      "bytes": 1345659
+    }
+  }
+}

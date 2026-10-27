@@ -1,0 +1,28 @@
+[
+  {
+    "id": "20261027_1113",
+    "israel_time": "27.10.2026 11:13",
+    "source": "EPCNT_111334.Csv",
+    "source_time": "11:13:34",
+    "percent": 16.7,
+    "voters": 1223286,
+    "eligible": null,
+    "kalpis": null,
+    "generated": null,
+    "fetched_at": null,
+    "kind": "previous"
+  },
+  {
+    "id": "20261027_1531",
+    "israel_time": "27.10.2026 15:31",
+    "source": "EPCNT_125747.Csv",
+    "source_time": "12:57:47",
+    "percent": 31.5,
+    "voters": 2309587,
+    "eligible": 7331981,
+    "kalpis": 8331,
+    "generated": "2026-10-27T11:09:20+00:00",
+    "fetched_at": "2026-10-27T13:31:05.303129+00:00",
+    "kind": "drop"
+  }
+]

@@ -16,3 +16,5 @@ A Hebrew, right-to-left election-day turnout dashboard for Israel’s 26th Kness
 https://liornabat.github.io/israel-elections-2026/
 
 Published with GitHub Pages from the root of the `main` branch: https://liornabat.github.io/israel-elections-2026/
+
+Last deployed: 2026-10-27

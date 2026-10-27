@@ -69,7 +69,7 @@ def set_output(changed):
         handle.write(f'changed={"true" if changed else "false"}\n')
 
 
-def fetch(url):
+def fetch(url, quiet_missing=False):
     """Download with curl.
 
     GitHub-hosted runners are blocked by the committee CloudFront. scripts/ensure_egress.sh
@@ -110,9 +110,11 @@ def fetch(url):
                     raise RuntimeError(f'{url} is larger than {MAX_BYTES} bytes')
                 return status, body
             snippet = body[:300].decode('utf-8', 'replace').replace('\n', ' ')
-            log(f'fetch HTTP {status} {url} {snippet}')
             if status in (403, 404):
+                if not quiet_missing:
+                    log(f'fetch HTTP {status} {url} {snippet}')
                 return status, b''
+            log(f'fetch HTTP {status} {url} {snippet}')
             last = RuntimeError(result.stderr.strip() or f'HTTP {status}')
             time.sleep(2 * (attempt + 1))
     raise last
@@ -240,7 +242,8 @@ def main():
 
     unpublished = []
     for relative in wanted_names(election_path):
-        status, body = fetch(BASE + relative + '?v=' + str(int(time.time())))
+        required = any(relative.endswith('/' + name) for name in REQUIRED)
+        status, body = fetch(BASE + relative + '?v=' + str(int(time.time())), quiet_missing=not required)
         if status == 200 and body:
             files[relative] = body
             log(f'fetched {relative} ({len(body)} bytes)')

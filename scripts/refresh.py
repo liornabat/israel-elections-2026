@@ -6,10 +6,10 @@ Exits without touching tracked files when the downloaded bytes have not changed.
 import hashlib
 import json
 import os
+import subprocess
 import sys
+import tempfile
 import time
-import urllib.error
-import urllib.request
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -24,7 +24,6 @@ DATA = ROOT / 'data'
 BASE = 'https://mapvotes.bechirot.gov.il/data/votes/'
 MAP_HOME = 'https://mapvotes.bechirot.gov.il/'
 JERUSALEM = ZoneInfo('Asia/Jerusalem')
-UA = {'User-Agent': 'Mozilla/5.0', 'Cache-Control': 'no-cache'}
 MAX_BYTES = 80_000_000
 
 REQUIRED = (
@@ -71,19 +70,42 @@ def set_output(changed):
 
 
 def fetch(url):
-    request = urllib.request.Request(url, headers=UA)
+    """Download with curl. urllib from GitHub-hosted runners gets a bare 403."""
     last = None
     for attempt in range(3):
-        try:
-            with urllib.request.urlopen(request, timeout=180) as response:
-                body = response.read(MAX_BYTES + 1)
+        with tempfile.NamedTemporaryFile() as handle:
+            header_path = handle.name + '.hdr'
+            try:
+                result = subprocess.run(
+                    [
+                        'curl', '-sS', '-L', '--http1.1', '--compressed',
+                        '--max-time', '180',
+                        '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                        '-H', 'Accept: application/json,text/plain,*/*',
+                        '-H', 'Accept-Language: he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+                        '-H', 'Referer: https://mapvotes.bechirot.gov.il/',
+                        '-D', header_path,
+                        '-o', handle.name,
+                        '-w', '%{http_code}',
+                        url,
+                    ],
+                    check=False, capture_output=True, text=True,
+                )
+            except Exception as error:
+                last = error
+                time.sleep(2 * (attempt + 1))
+                continue
+            status = int(result.stdout.strip() or '0')
+            body = Path(handle.name).read_bytes()
+            if status == 200 and body:
                 if len(body) > MAX_BYTES:
                     raise RuntimeError(f'{url} is larger than {MAX_BYTES} bytes')
-                return response.status, body
-        except urllib.error.HTTPError as error:
-            return error.code, b''
-        except Exception as error:
-            last = error
+                return status, body
+            snippet = body[:300].decode('utf-8', 'replace').replace('\n', ' ')
+            log(f'fetch HTTP {status} {url} {snippet}')
+            if status in (403, 404):
+                return status, b''
+            last = RuntimeError(result.stderr.strip() or f'HTTP {status}')
             time.sleep(2 * (attempt + 1))
     raise last
 
@@ -288,7 +310,6 @@ def main():
     timeline = rebuild_timeline(municipal, now)
     write_json(DATA / 'timeline.json', timeline)
 
-    import subprocess
     for script in ('build.py', 'page_data.py', 'build_site.py'):
         subprocess.check_call([sys.executable, str(ROOT / 'scripts' / script)])
 
